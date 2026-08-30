@@ -1,15 +1,17 @@
-const express = require("express");
-const cors = require("cors");
-require("dotenv").config();
+import { createRequire } from "node:module";
+import { httpServerHandler } from "cloudflare:node";
+import express from "express";
+
+const require = createRequire(import.meta.url);
 
 const healthRoutes = require("./routes/health");
 const userRoutes = require("./routes/users");
 const productRoutes = require("./routes/products");
+
 const app = express();
 
-app.use(cors());
 app.use(express.json());
-app.use("/api/products", productRoutes);
+
 app.get("/", (req, res) => {
   res.json({
     success: true,
@@ -20,9 +22,8 @@ app.get("/", (req, res) => {
 
 app.use("/api/health", healthRoutes);
 app.use("/api/users", userRoutes);
+app.use("/api/products", productRoutes);
 
-const PORT = process.env.PORT || 3000;
+app.listen(3000);
 
-app.listen(PORT, () => {
-  console.log(`Xelz Backend running on port ${PORT}`);
-});
+export default httpServerHandler({ port: 3000 });
