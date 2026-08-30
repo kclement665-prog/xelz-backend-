@@ -1,29 +1,86 @@
-import { createRequire } from "node:module";
-import { httpServerHandler } from "cloudflare:node";
-import express from "express";
+export default {
+  async fetch(request, env) {
+    const url = new URL(request.url);
 
-const require = createRequire(import.meta.url);
+    // Home
+    if (request.method === "GET" && url.pathname === "/") {
+      return json({
+        success: true,
+        message: "Xelz Backend is running",
+        version: "1.0.0"
+      });
+    }
 
-const healthRoutes = require("./routes/health");
-const userRoutes = require("./routes/users");
-const productRoutes = require("./routes/products");
+    // Health check
+    if (request.method === "GET" && url.pathname === "/api/health") {
+      return json({
+        success: true,
+        status: "healthy",
+        service: "Xelz Store API"
+      });
+    }
 
-const app = express();
+    // Products
+    if (request.method === "GET" && url.pathname === "/api/products") {
+      return json({
+        success: true,
+        products: []
+      });
+    }
 
-app.use(express.json());
+    // Create order
+    if (request.method === "POST" && url.pathname === "/api/orders") {
+      try {
+        const body = await request.json();
+        const { customer, items, amount } = body;
 
-app.get("/", (req, res) => {
-  res.json({
-    success: true,
-    message: "Welcome to Xelz Backend 🚀",
-    version: "1.0.0"
+        if (!customer || !items || !amount) {
+          return json(
+            {
+              success: false,
+              message: "Customer, items and amount are required"
+            },
+            400
+          );
+        }
+
+        const order = {
+          id: "XZ-" + Date.now(),
+          customer,
+          items,
+          amount,
+          status: "pending",
+          createdAt: new Date().toISOString()
+        };
+
+        return json({
+          success: true,
+          message: "Order created successfully",
+          order
+        }, 201);
+
+      } catch (error) {
+        return json({
+          success: false,
+          message: "Invalid JSON request"
+        }, 400);
+      }
+    }
+
+    // Not found
+    return json({
+      success: false,
+      message: "Xelz API endpoint not found"
+    }, 404);
+  }
+};
+
+function json(data, status = 200) {
+  return new Response(JSON.stringify(data), {
+    status,
+    headers: {
+      "Content-Type": "application/json",
+      "Access-Control-Allow-Origin": "*"
+    }
   });
-});
-
-app.use("/api/health", healthRoutes);
-app.use("/api/users", userRoutes);
-app.use("/api/products", productRoutes);
-
-app.listen(3000);
-
-export default httpServerHandler({ port: 3000 });
+        }
