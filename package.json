@@ -1,6 +1,7 @@
 {
   "name": "xelz-backend",
   "version": "1.0.0",
+  "type": "module",
   "description": "Backend API for Xelz Store",
   "main": "server.js",
   "scripts": {
