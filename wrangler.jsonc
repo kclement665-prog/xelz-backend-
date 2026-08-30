@@ -2,5 +2,6 @@
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "xelz-backend",
   "main": "server.js",
-  "compatibility_date": "2026-08-30"
+  "compatibility_date": "2026-08-30",
+  "compatibility_flags": ["nodejs_compat"]
 }
